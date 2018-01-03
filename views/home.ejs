@@ -1,0 +1,138 @@
+<html>
+    <head>
+        <title>Profile</title>
+        <link href="client/styles/style.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        <style>
+
+            .post-tweet textarea{
+                width: 50%;
+                height: 50%;
+            }
+
+            .col-md-3, .col-md-4, .col-md-7, .col-md-2{
+                float: left;
+            }
+
+            .card-subtitle  {
+                font-size: 12px;
+            }
+
+            #tweetsPosted {
+                overflow: auto;
+                height: 100%;
+            }
+
+        </style>
+
+    </head>
+    <body>
+        <!-- <div class="header">
+            <a href="/profile">Profile</a>
+        </header> -->
+        <%- include header.ejs %>
+        <div class="container-fluid">
+            <div class="col-md-12">
+                <form id="postTweet">
+                    <div class="form-row">
+                        <div class="col-7">
+                            <textarea id="tweetMsg" type="text" class="form-control"></textarea>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" type="submit">Tweet</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <div class="inner-block">
+                    <ul id="followingList" class="list-group"></ul>
+                </div>
+                <div class="inner-block">
+                    <ul id="followerList" class="list-group"></ul>
+                </div>
+            </div>
+            <div class="col-md-7" id="tweetsPosted">
+            </div>
+            <div class="col-md-1">
+                    
+            </div>
+        </div>
+    </body>
+    <script>
+        
+        if(!localStorage.getItem("token")) {
+            window.location.href = "/";
+        }
+        
+        getFollowers();
+        getFollowing();
+        getAPICall("/api/AppUsers/tweets", "GET", {}, recieveTweetsCallback);
+
+        function getFollowing() {
+            var apiName = "/api/AppUsers/listOfFollowing";
+            getAPICall(apiName, "POST", {}, getFollowingCallBack);
+        }
+
+        function getFollowingCallBack(success) {
+            for(var i=0; i<success.response.length; i++){
+                $("#followingList").append("<li class='list-group-item'>" + success.response[i].name + "</li>");
+            }
+        }
+
+        function getFollowers() {
+            var apiName = "/api/AppUsers/listOfFollowers";
+            getAPICall(apiName, "POST", {}, getFollowersCallBack);
+        }
+
+        function getFollowersCallBack(success) {
+            for(var i=0; i<success.response.length; i++){
+                $("#followerList").append("<li class='list-group-item'>" + success.response[i].name + "</li>");
+            }
+        }
+
+        function getAPICall(apiName, method, params, cb) {
+            $.ajax({
+                type: method,
+                url: apiName,
+                headers: {
+                    authorization: localStorage.getItem("token")
+                },
+                data: params,
+                success: cb,
+                error: ((err) => {
+                    
+                })
+            });
+        }
+        
+        $("#postTweet").submit( (e) => {
+            e.preventDefault();
+            getTweets();
+        });
+
+        function getTweets() {
+            var apiName = "/api/AppUsers/tweet";
+            var params = {
+                text: $("#tweetMsg").val()
+            };
+            getAPICall(apiName, "POST", params, postTweetCallback)
+        }
+
+        function postTweetCallback(success) {
+            getAPICall("/api/AppUsers/tweets", "GET", {}, recieveTweetsCallback);
+        }
+
+        function recieveTweetsCallback(success) {
+            for(var i=0; i<success.response[0].length; i++){
+                // $("#tweetsPosted").append("<li><h3>" + success.response[0][i].text + "</h3><span>"+ success.response[0][i].date_time +"</span></li>");
+                $("#tweetsPosted").append('<div class="card" style="margin-bottom:4px"><div class="card-title">'+success.response[0][i].text+'</div><div class="card-subtitle">'+success.response[0][i].date_time+'</div></div>');
+            }
+            $("#tweetMsg").val("");
+        }
+        
+    </script>
+</html>
+    

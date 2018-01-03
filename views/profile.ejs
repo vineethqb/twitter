@@ -1,0 +1,96 @@
+<html>
+        <head>
+            <title>Registration</title>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+        </head>
+        <body class="container-fluid">
+            <a href="/home">Home</a>
+            <br>
+            <form id="profileUpdate">
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Name</label>
+                    <input type="text" class="form-control" name="name" placeholder="Enter Name">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputEmail2">City</label>
+                    <input type="text" class="form-control" name="city" placeholder="Enter city">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputEmail2">country</label>
+                    <input type="text" class="form-control" name="country" placeholder="Enter country">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputEmail2">email</label>
+                    <input type="text" class="form-control" name="email" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputEmail2">mobile</label>
+                    <input type="text" class="form-control" name="mobile" placeholder="Enter mobile">
+                </div>
+                <br>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </form>
+        </body>
+        <script>
+    
+            if(!localStorage.getItem("token")) {
+                window.location.href = "/";
+            }
+            
+            $.ajax({
+                type: "GET",
+                url: "/api/AppUsers/" + localStorage.getItem("userId"),
+                headers: {
+                    authorization: localStorage.getItem("token")
+                },
+                success: ((success) => {
+                    bindValuesToInput(success);
+                }),
+                error: ((err) => {
+                    
+                })
+            });
+
+            $("#profileUpdate").submit( (e) => {
+                e.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: "/api/AppUsers/" + localStorage.getItem("userId"),
+                    headers: {
+                        authorization: localStorage.getItem("token")
+                    },
+                    data: getApiParams(),
+                    success: ((success) => {
+                        bindValuesToInput(success);
+                    }),
+                    error: ((err) => {
+                        
+                    })
+                });
+            });
+
+            function getApiParams() {
+                var $inputs = $('#profileUpdate :input');
+                var values = {};
+                $inputs.each(function() {
+                    if(this.name === "mobile"){
+                        values.contact = { mobile: $(this).val() };
+                    } else {
+                        values[this.name] = $(this).val();
+                    }
+                });
+                console.log(values)
+                return values;
+            }
+
+            function bindValuesToInput(response) {
+                var $inputs = $('#profileUpdate :input');
+                $inputs.each(function() {
+                    this.name === "mobile" ? $(this).val(response.contact[this.name]) : $(this).val(response[this.name]);
+                });
+            }
+            
+        </script>
+    </html>
+        

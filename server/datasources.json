@@ -1,0 +1,16 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "Consensys": {
+    "host": "localhost",
+    "port": 27017,
+    "url": "",
+    "database": "Consensys",
+    "password": "",
+    "name": "Consensys",
+    "user": "",
+    "connector": "mongodb"
+  }
+}
